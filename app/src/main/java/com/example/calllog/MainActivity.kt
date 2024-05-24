@@ -17,6 +17,7 @@ import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
+import com.google.firebase.FirebaseApp
 
 
 class MainActivity : AppCompatActivity() {
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        FirebaseApp.initializeApp(this)
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_CALL_LOG
@@ -45,7 +47,8 @@ class MainActivity : AppCompatActivity() {
                 arrayOf(
                     Manifest.permission.READ_CALL_LOG,
                     Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.READ_CONTACTS
+                    Manifest.permission.READ_CONTACTS,
+                    Manifest.permission.POST_NOTIFICATIONS,
                 ),
                 REQUEST_CODE_PERMISSIONS
             )
@@ -66,8 +69,12 @@ class MainActivity : AppCompatActivity() {
             ) {
                 getAllContacts()
                 getAllCallLogs()
-            }else{
-                val toast = Toast.makeText(this,"Please provide all permissions from app settings",Toast.LENGTH_LONG)
+            } else {
+                val toast = Toast.makeText(
+                    this,
+                    "Please provide all permissions from app settings",
+                    Toast.LENGTH_LONG
+                )
                 toast.show()
                 navigateToAppPermissions()
             }
@@ -85,12 +92,17 @@ class MainActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 // Permissions granted
             } else {
-                val toast = Toast.makeText(this,"Please provide all permissions from app settings",Toast.LENGTH_LONG)
+                val toast = Toast.makeText(
+                    this,
+                    "Please provide all permissions from app settings",
+                    Toast.LENGTH_LONG
+                )
                 toast.show()
             }
         }
     }
-//Todo get all contacts
+
+    //Todo get all contacts
     private fun getAllContacts() {
         val cursor = contentResolver.query(
             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -141,7 +153,7 @@ class MainActivity : AppCompatActivity() {
                 val lastModified = it.getLong(it.getColumnIndex(CallLog.Calls.LAST_MODIFIED))
 
                 /*Todo in variables me saare call logs ka data aa raha hai
-                *Todo in variables me saare call logs ka data aa raha hai
+                * Todo in variables me saare call logs ka data aa raha hai
                 * Todo in variables me saare call logs ka data aa raha hai
                 * Todo in variables me saare call logs ka data aa raha hai
                 * Todo in variables me saare call logs ka data aa raha hai
@@ -154,6 +166,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun navigateToAppPermissions() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.fromParts("package", packageName, null)
